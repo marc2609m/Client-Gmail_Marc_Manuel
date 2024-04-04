@@ -1,11 +1,17 @@
 package bandejas;
 
+import Client.EmailClientConnection;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import main.Login;
 
 public class BandejaPrincipal extends JFrame{
+    
+    private EmailClientConnection ecc;
 
     public BandejaPrincipal() {
         bandejaPrincipal();
@@ -27,7 +33,26 @@ public class BandejaPrincipal extends JFrame{
         menuBandejas.add(EnviadoslItem);
         menuBandejas.add(EsborranysItem);
         menuBandejas.add(CorreuBrossaItem);
+        
+        JMenu menuLogout = new JMenu("Log out");
+        JMenuItem LogoutItem = new JMenuItem("Log out");
+        menuLogout.add(LogoutItem);
+        
         menuBar.add(menuBandejas);
+        menuBar.add(menuLogout);
+        
+        ecc = new EmailClientConnection();
+        
+        LogoutItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ecc.CloseConectionImap();
+                ecc.CloseConectionSMTP();
+                Login l = new Login();
+                l.setVisible(true);
+                setVisible(false);
+            }
+        });
         
         setJMenuBar(menuBar);
     }

@@ -1,6 +1,6 @@
 package main;
 
-import Client.EmailClientConnection;
+import client.EmailClientConnection;
 
 public class MainPrueba {
 

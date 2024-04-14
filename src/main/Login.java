@@ -1,11 +1,11 @@
 package main;
 
-import Client.EmailClientConnection;
+import client.EmailClientConnection;
 import bandejas.BandejaPrincipal;
-import clases.MailConfigUse;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JButton;
@@ -30,12 +30,12 @@ public class Login extends JFrame{
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
         
-        JPanel panel1 = new JPanel();
+        JPanel panel1 = new JPanel(new GridBagLayout());
         JLabel LabelLogin = new JLabel("Inici de sessió");
         panel1.add(LabelLogin);
         add(panel1, BorderLayout.NORTH);
         
-        JPanel panel2 = new JPanel();
+        JPanel panel2 = new JPanel(new GridBagLayout());
         JLabel LabelCorreu = new JLabel("Correu");
         JLabel LabelPasswd = new JLabel("Contrasenya");
         TextCorreu = new JTextField(20);
@@ -68,7 +68,7 @@ public class Login extends JFrame{
         
         add(panel2, BorderLayout.CENTER);
         
-        JPanel panel3 = new JPanel();
+        JPanel panel3 = new JPanel(new GridBagLayout());
         
         JButton BotonBorrar = new JButton("Esborrar");
         
@@ -120,10 +120,6 @@ public class Login extends JFrame{
         
         
     }
-    
-    
-    
-    
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {

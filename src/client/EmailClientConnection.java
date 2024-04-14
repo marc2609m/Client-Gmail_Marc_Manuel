@@ -1,4 +1,4 @@
-package Client;
+package client;
 
 /**
  *
@@ -6,6 +6,8 @@ package Client;
  */
 import javax.mail.*;
 import java.util.Properties;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 public class EmailClientConnection {
 
@@ -103,6 +105,31 @@ public class EmailClientConnection {
             System.out.println("Desconectado del servidor SMTP");
         } catch (MessagingException e) {
             e.printStackTrace();
+        }
+    }
+    
+    public void EnviarMail(String asunto, String destinatario, String contenido) {
+        try {
+            Properties smtpProps = new Properties();
+            smtpProps.setProperty("mail.smtp.host", "smtp.gmail.com");
+            smtpProps.setProperty("mail.smtp.auth", "true");
+            smtpProps.setProperty("mail.smtp.starttls.enable", "true");
+            smtpProps.setProperty("mail.smtp.port", "587");
+            
+            Session session = Session.getDefaultInstance(smtpProps);
+            
+            MimeMessage message = new MimeMessage(session);
+            message.addRecipient(Message.RecipientType.TO,
+                    new InternetAddress(destinatario));
+            message.setSubject(asunto);
+            message.setText(contenido);
+            
+            Transport transport = session.getTransport("smtp");
+            transport.connect(USERNAME, PASSWORD);
+            transport.sendMessage(message, message.getAllRecipients());
+            transport.close();
+        } catch (MessagingException ex) {
+            System.out.println(ex.getMessage());
         }
     }
 

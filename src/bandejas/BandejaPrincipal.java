@@ -1,6 +1,7 @@
 package bandejas;
 
-import Client.EmailClientConnection;
+import client.EmailClientConnection;
+import funciones.EnviarMails;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JFrame;
@@ -34,11 +35,16 @@ public class BandejaPrincipal extends JFrame{
         menuBandejas.add(EsborranysItem);
         menuBandejas.add(CorreuBrossaItem);
         
+        JMenu menuFunciones = new JMenu("Funcions");
+        JMenuItem EnviarMailItem = new JMenuItem("Enviar Mail");
+        menuFunciones.add(EnviarMailItem);
+        
         JMenu menuLogout = new JMenu("Log out");
         JMenuItem LogoutItem = new JMenuItem("Log out");
         menuLogout.add(LogoutItem);
         
         menuBar.add(menuBandejas);
+        menuBar.add(menuFunciones);
         menuBar.add(menuLogout);
         
         ecc = new EmailClientConnection();
@@ -50,6 +56,15 @@ public class BandejaPrincipal extends JFrame{
                 ecc.CloseConectionSMTP();
                 Login l = new Login();
                 l.setVisible(true);
+                setVisible(false);
+            }
+        });
+        
+        EnviarMailItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                EnviarMails em = new EnviarMails();
+                em.setVisible(true);
                 setVisible(false);
             }
         });

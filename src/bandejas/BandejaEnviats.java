@@ -7,34 +7,28 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
-import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.JPanel;
 import main.Login;
 
-public class BandejaPrincipal extends JFrame {
-
+public class BandejaEnviats extends JFrame{
     private EmailClientConnection ecc;
-    private List<Mail> allMails;
-    private int currentIndex = 0;
 
-    public BandejaPrincipal() {
-        bandejaPrincipal();
+    public BandejaEnviats() {
+        bandejaEnviats();
     }
-
-    private void bandejaPrincipal() {
-        setTitle("Safata principal");
+    
+    private void bandejaEnviats(){
+        setTitle("Enviats");
         setSize(400, 300);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+        
         JMenuBar menuBar = new JMenuBar();
-
+        
         JMenu menuBandejas = new JMenu("Safates");
         JMenuItem BandejaPrincipalItem = new JMenuItem("Safata principal");
         JMenuItem EnviadoslItem = new JMenuItem("Enviats");
@@ -44,41 +38,35 @@ public class BandejaPrincipal extends JFrame {
         menuBandejas.add(EnviadoslItem);
         menuBandejas.add(EsborranysItem);
         menuBandejas.add(CorreuBrossaItem);
-
+        
         JMenu menuFunciones = new JMenu("Funcions");
         JMenuItem EnviarMailItem = new JMenuItem("Enviar Mail");
         menuFunciones.add(EnviarMailItem);
-
+        
         JMenu menuLogout = new JMenu("Log out");
         JMenuItem LogoutItem = new JMenuItem("Log out");
         menuLogout.add(LogoutItem);
-
+        
         menuBar.add(menuBandejas);
         menuBar.add(menuFunciones);
         menuBar.add(menuLogout);
-
+        
         ecc = new EmailClientConnection();
+        
+        List<Mail> mails = ecc.ConseguirEnviados();
+        
+        Object[][] data = new Object[mails.size()][2];
 
-        loadInitialMails();
-
-        Object[][] data = new Object[allMails.size()][2];
-        populateTableData(data);
+        for (int i = 0; i < mails.size(); i++) {
+            Mail m = mails.get(i);
+            data[i][0] = m.getRemitente();
+            data[i][1] = m.getAsunto();
+        }
 
         String[] columnNames = {"Emissor", "Assumpte"};
         JTable table = new JTable(data, columnNames);
         JScrollPane scrollPane = new JScrollPane(table);
-
-        JButton moreButton = new JButton("Més");
-        moreButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                loadMoreMails();
-                Object[][] newData = new Object[allMails.size()][2];
-                populateTableData(newData);
-                table.setModel(new DefaultTableModel(newData, columnNames));
-            }
-        });
-
+        
         LogoutItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -89,7 +77,7 @@ public class BandejaPrincipal extends JFrame {
                 setVisible(false);
             }
         });
-
+        
         EnviarMailItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -98,7 +86,25 @@ public class BandejaPrincipal extends JFrame {
                 setVisible(false);
             }
         });
-
+        
+        BandejaPrincipalItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                BandejaPrincipal bp = new BandejaPrincipal();
+                bp.setVisible(true);
+                setVisible(false);
+            }
+        });
+        
+        BandejaPrincipalItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                BandejaPrincipal bp = new BandejaPrincipal();
+                bp.setVisible(true);
+                setVisible(false);
+            }
+        });
+        
         EsborranysItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -107,16 +113,7 @@ public class BandejaPrincipal extends JFrame {
                 setVisible(false);
             }
         });
-
-        EnviadoslItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                BandejaEnviats be = new BandejaEnviats();
-                be.setVisible(true);
-                setVisible(false);
-            }
-        });
-
+        
         CorreuBrossaItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -125,33 +122,9 @@ public class BandejaPrincipal extends JFrame {
                 setVisible(false);
             }
         });
-
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.add(moreButton);
-
+        
         getContentPane().add(scrollPane, BorderLayout.CENTER);
-        getContentPane().add(buttonPanel, BorderLayout.SOUTH);
-
+        
         setJMenuBar(menuBar);
-    }
-
-    private void loadInitialMails() {
-        allMails = ecc.ConseguirInbox(0, 9); // Cargar los primeros 10 correos
-        currentIndex = 9; // Actualizar el índice
-    }
-
-    private void loadMoreMails() {
-        int startIndex = currentIndex + 1; // El siguiente correo después del último cargado
-        int endIndex = currentIndex + 10; // El índice del décimo siguiente correo
-        allMails.addAll(ecc.ConseguirInbox(startIndex, endIndex));
-        currentIndex = endIndex; // Actualizar el índice
-    }
-
-    private void populateTableData(Object[][] data) {
-        for (int i = 0; i < allMails.size(); i++) {
-            Mail m = allMails.get(i);
-            data[i][0] = m.getRemitente();
-            data[i][1] = m.getAsunto();
-        }
     }
 }

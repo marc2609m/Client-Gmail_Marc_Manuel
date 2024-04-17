@@ -1,5 +1,7 @@
 package funciones;
 
+import bandejas.BandejaCorreuBrossa;
+import bandejas.BandejaEnviats;
 import bandejas.BandejaPrincipal;
 import client.EmailClientConnection;
 import java.awt.BorderLayout;
@@ -164,6 +166,24 @@ public class EnviarMails extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 BandejaPrincipal bp = new BandejaPrincipal();
                 bp.setVisible(true);
+                setVisible(false);
+            }
+        });
+        
+        EnviadoslItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                BandejaEnviats be = new BandejaEnviats();
+                be.setVisible(true);
+                setVisible(false);
+            }
+        });
+        
+        CorreuBrossaItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                BandejaCorreuBrossa bcb = new BandejaCorreuBrossa();
+                bcb.setVisible(true);
                 setVisible(false);
             }
         });

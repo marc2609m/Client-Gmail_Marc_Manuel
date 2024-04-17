@@ -1,19 +1,26 @@
 package clases;
 
-import java.awt.List;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Mail {
     
     private String contingut;
     private String remitente;
     private String asunto;
-    private List ListaArchivos;
+    private List<File> ListaArchivos;
+
+    public Mail() {
+    }
+    
+    
 
     public Mail(String contingut, String remitente, String asunto) {
         this.contingut = contingut;
         this.remitente = remitente;
         this.asunto = asunto;
-        ListaArchivos = new List();
+        ListaArchivos = new ArrayList();
     }
 
     public String getContingut() {

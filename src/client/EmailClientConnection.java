@@ -4,8 +4,14 @@ package client;
  *
  * @author garci
  */
+import clases.Mail;
+import java.io.IOException;
+import java.util.List;
+import java.util.ArrayList;
 import javax.mail.*;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
@@ -21,10 +27,6 @@ public class EmailClientConnection {
 
     public EmailClientConnection() {
     }
-    
-    
-    
-    
 
     public void ConectionImap() {
         // Conectar al servidor IMAP
@@ -107,7 +109,7 @@ public class EmailClientConnection {
             e.printStackTrace();
         }
     }
-    
+
     public void EnviarMail(String asunto, String destinatario, String contenido) {
         try {
             Properties smtpProps = new Properties();
@@ -115,15 +117,15 @@ public class EmailClientConnection {
             smtpProps.setProperty("mail.smtp.auth", "true");
             smtpProps.setProperty("mail.smtp.starttls.enable", "true");
             smtpProps.setProperty("mail.smtp.port", "587");
-            
+
             Session session = Session.getDefaultInstance(smtpProps);
-            
+
             MimeMessage message = new MimeMessage(session);
             message.addRecipient(Message.RecipientType.TO,
                     new InternetAddress(destinatario));
             message.setSubject(asunto);
             message.setText(contenido);
-            
+
             Transport transport = session.getTransport("smtp");
             transport.connect(USERNAME, PASSWORD);
             transport.sendMessage(message, message.getAllRecipients());
@@ -131,6 +133,182 @@ public class EmailClientConnection {
         } catch (MessagingException ex) {
             System.out.println(ex.getMessage());
         }
+    }
+
+    public List<Mail> ConseguirInbox(int startIndex, int endIndex) {
+        List<Mail> mails = new ArrayList();
+        try {
+            Properties properties = new Properties();
+            properties.put("mail.store.protocol", "imaps");
+            properties.put("mail.imaps.host", "imap.gmail.com");
+            properties.put("mail.imaps.port", "993");
+
+            Session session = Session.getInstance(properties, new Authenticator() {
+                @Override
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(USERNAME, PASSWORD);
+                }
+            });
+
+            Store store = session.getStore("imaps");
+            store.connect();
+
+            Folder folder = store.getFolder("INBOX");
+            folder.open(Folder.READ_ONLY);
+
+            Message[] mensajes = folder.getMessages(startIndex + 1, endIndex); // +1 because index starts from 1
+
+            for (Message mensaje : mensajes) {
+                Mail m = new Mail();
+                m.setAsunto(mensaje.getSubject());
+                m.setRemitente(mensaje.getFrom()[0].toString());
+                m.setContingut(mensaje.getContent().toString());
+                mails.add(m);
+            }
+
+            folder.close(false);
+            store.close();
+        } catch (NoSuchProviderException ex) {
+            System.out.println(ex.getMessage());
+        } catch (MessagingException ex) {
+            System.out.println(ex.getMessage());
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+        }
+
+        return mails;
+    }
+
+    public List<Mail> ConseguirEnviados() {
+        List<Mail> mails = new ArrayList();
+        try {
+            Properties properties = new Properties();
+            properties.put("mail.store.protocol", "imaps");
+            properties.put("mail.imaps.host", "imap.gmail.com");
+            properties.put("mail.imaps.port", "993");
+
+            Session session = Session.getInstance(properties, new Authenticator() {
+                @Override
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(USERNAME, PASSWORD);
+                }
+            });
+
+            Store store = session.getStore("imaps");
+            store.connect();
+
+            Folder folder = store.getFolder("[Gmail]/Enviats");
+            folder.open(Folder.READ_ONLY);
+
+            Message[] mensajes = folder.getMessages();
+
+            for (Message mensaje : mensajes) {
+                Mail m = new Mail();
+                m.setAsunto(mensaje.getSubject());
+                m.setRemitente(mensaje.getFrom()[0].toString());
+                m.setContingut(mensaje.getContent().toString());
+                mails.add(m);
+            }
+
+            folder.close(false);
+            store.close();
+        } catch (NoSuchProviderException ex) {
+            System.out.println(ex.getMessage());
+        } catch (MessagingException ex) {
+            System.out.println(ex.getMessage());
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+        }
+
+        return mails;
+    }
+
+    public List<Mail> ConseguirEsborranys() {
+        List<Mail> mails = new ArrayList();
+        try {
+            Properties properties = new Properties();
+            properties.put("mail.store.protocol", "imaps");
+            properties.put("mail.imaps.host", "imap.gmail.com");
+            properties.put("mail.imaps.port", "993");
+
+            Session session = Session.getInstance(properties, new Authenticator() {
+                @Override
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(USERNAME, PASSWORD);
+                }
+            });
+
+            Store store = session.getStore("imaps");
+            store.connect();
+
+            Folder folder = store.getFolder("[Gmail]/Esborranys");
+            folder.open(Folder.READ_ONLY);
+
+            Message[] mensajes = folder.getMessages();
+
+            for (Message mensaje : mensajes) {
+                Mail m = new Mail();
+                m.setAsunto(mensaje.getSubject());
+                m.setRemitente(mensaje.getFrom()[0].toString());
+                m.setContingut(mensaje.getContent().toString());
+                mails.add(m);
+            }
+
+            folder.close(false);
+            store.close();
+        } catch (NoSuchProviderException ex) {
+            System.out.println(ex.getMessage());
+        } catch (MessagingException ex) {
+            System.out.println(ex.getMessage());
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+        }
+
+        return mails;
+    }
+
+    public List<Mail> ConseguirCorreuBrossa() {
+        List<Mail> mails = new ArrayList();
+        try {
+            Properties properties = new Properties();
+            properties.put("mail.store.protocol", "imaps");
+            properties.put("mail.imaps.host", "imap.gmail.com");
+            properties.put("mail.imaps.port", "993");
+
+            Session session = Session.getInstance(properties, new Authenticator() {
+                @Override
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(USERNAME, PASSWORD);
+                }
+            });
+
+            Store store = session.getStore("imaps");
+            store.connect();
+
+            Folder folder = store.getFolder("[Gmail]/Correu brossa");
+            folder.open(Folder.READ_ONLY);
+
+            Message[] mensajes = folder.getMessages();
+
+            for (Message mensaje : mensajes) {
+                Mail m = new Mail();
+                m.setAsunto(mensaje.getSubject());
+                m.setRemitente(mensaje.getFrom()[0].toString());
+                m.setContingut(mensaje.getContent().toString());
+                mails.add(m);
+            }
+
+            folder.close(false);
+            store.close();
+        } catch (NoSuchProviderException ex) {
+            System.out.println(ex.getMessage());
+        } catch (MessagingException ex) {
+            System.out.println(ex.getMessage());
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+        }
+
+        return mails;
     }
 
 }

@@ -5,6 +5,7 @@ package client;
  * @author garci
  */
 import clases.Mail;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
@@ -13,19 +14,24 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 
 public class EmailClientConnection {
 
     private static String USERNAME;
     private static String PASSWORD;
+    private List<File> archivosAdjuntos;
 
     public EmailClientConnection(String USERNAME, String PASSWORD) {
         this.USERNAME = USERNAME;
         this.PASSWORD = PASSWORD;
+        this.archivosAdjuntos = new ArrayList();
     }
 
     public EmailClientConnection() {
+        this.archivosAdjuntos = new ArrayList();
     }
 
     public void ConectionImap() {
@@ -110,7 +116,7 @@ public class EmailClientConnection {
         }
     }
 
-    public void EnviarMail(String asunto, String destinatario, String contenido) {
+    public void EnviarMail(String asunto, String destinatarios, String cc, String bcc, String contenido) {
         try {
             Properties smtpProps = new Properties();
             smtpProps.setProperty("mail.smtp.host", "smtp.gmail.com");
@@ -118,18 +124,58 @@ public class EmailClientConnection {
             smtpProps.setProperty("mail.smtp.starttls.enable", "true");
             smtpProps.setProperty("mail.smtp.port", "587");
 
-            Session session = Session.getDefaultInstance(smtpProps);
+            Session session = Session.getInstance(smtpProps, new Authenticator() {
+                @Override
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(USERNAME, PASSWORD);
+                }
+            });
 
             MimeMessage message = new MimeMessage(session);
-            message.addRecipient(Message.RecipientType.TO,
-                    new InternetAddress(destinatario));
-            message.setSubject(asunto);
-            message.setText(contenido);
 
-            Transport transport = session.getTransport("smtp");
-            transport.connect(USERNAME, PASSWORD);
-            transport.sendMessage(message, message.getAllRecipients());
-            transport.close();
+            // Añadir destinatarios al campo "Para"
+            String[] destinatariosArray = destinatarios.split(",");
+            for (String destinatario : destinatariosArray) {
+                message.addRecipient(Message.RecipientType.TO, new InternetAddress(destinatario.trim()));
+            }
+
+            // Añadir destinatarios al campo "Cc"
+            if (cc != null && !cc.isBlank()) {
+                String[] ccArray = cc.split(",");
+                for (String ccAddress : ccArray) {
+                    message.addRecipient(Message.RecipientType.CC, new InternetAddress(ccAddress.trim()));
+                }
+            }
+
+            // Añadir destinatarios al campo "Bcc"
+            if (bcc != null && !bcc.isBlank()) {
+                String[] bccArray = bcc.split(",");
+                for (String bccAddress : bccArray) {
+                    message.addRecipient(Message.RecipientType.BCC, new InternetAddress(bccAddress.trim()));
+                }
+            }
+
+            // Configurar el contenido del mensaje (texto y posiblemente adjuntos)
+            MimeMultipart multipart = new MimeMultipart();
+
+            // Añadir el contenido del correo (texto)
+            MimeBodyPart textoPart = new MimeBodyPart();
+            textoPart.setText(contenido);
+            multipart.addBodyPart(textoPart);
+
+            // Adjuntar archivos si hay algún archivo adjunto
+            // Adjuntar archivos si hay algún archivo adjunto
+            if (archivosAdjuntos != null && !archivosAdjuntos.isEmpty()) {
+                for (File adjunto : archivosAdjuntos) {
+                    adjuntarArchivo(adjunto, multipart);
+                }
+            }
+
+            // Asignar el contenido mixto al mensaje
+            message.setContent(multipart);
+
+            // Enviar el mensaje
+            Transport.send(message);
         } catch (MessagingException ex) {
             System.out.println(ex.getMessage());
         }
@@ -156,9 +202,12 @@ public class EmailClientConnection {
             Folder folder = store.getFolder("INBOX");
             folder.open(Folder.READ_ONLY);
 
-            Message[] mensajes = folder.getMessages(startIndex + 1, endIndex); // +1 because index starts from 1
+            // Obtener los mensajes en orden inverso
+            Message[] mensajes = folder.getMessages(folder.getMessageCount() - endIndex, folder.getMessageCount() - startIndex);
 
-            for (Message mensaje : mensajes) {
+            // Agregar los mensajes a la lista en orden inverso
+            for (int i = mensajes.length - 1; i >= 0; i--) {
+                Message mensaje = mensajes[i];
                 Mail m = new Mail();
                 m.setAsunto(mensaje.getSubject());
                 m.setRemitente(mensaje.getFrom()[0].toString());
@@ -309,6 +358,20 @@ public class EmailClientConnection {
         }
 
         return mails;
+    }
+
+    public void adjuntarArchivo(File archivoAdjunto, MimeMultipart multipart) throws MessagingException {
+        MimeBodyPart adjunto = new MimeBodyPart();
+        try {
+            adjunto.attachFile(archivoAdjunto);
+        } catch (IOException ex) {
+            Logger.getLogger(EmailClientConnection.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        multipart.addBodyPart(adjunto);
+    }
+
+    public void agregarArchivoAdjunto(File archivoAdjunto) {
+            archivosAdjuntos.add(archivoAdjunto);
     }
 
 }

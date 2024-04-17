@@ -136,15 +136,16 @@ public class BandejaPrincipal extends JFrame {
     }
 
     private void loadInitialMails() {
-        allMails = ecc.ConseguirInbox(0, 9); // Cargar los primeros 10 correos
-        currentIndex = 9; // Actualizar el índice
+        // Cargar los últimos 10 correos
+        allMails = ecc.ConseguirInbox(0, 9);
+        currentIndex = allMails.size() - 1; // Actualizar el índice
     }
 
     private void loadMoreMails() {
-        int startIndex = currentIndex + 1; // El siguiente correo después del último cargado
-        int endIndex = currentIndex + 10; // El índice del décimo siguiente correo
-        allMails.addAll(ecc.ConseguirInbox(startIndex, endIndex));
-        currentIndex = endIndex; // Actualizar el índice
+        int endIndex = currentIndex - 1; // El índice del correo anterior al último correo actual
+        int startIndex = Math.max(0, endIndex - 9); // El índice del correo anterior al primer correo actual
+        allMails.addAll(0, ecc.ConseguirInbox(startIndex, endIndex));
+        currentIndex = startIndex - 1; // Actualizar el índice
     }
 
     private void populateTableData(Object[][] data) {

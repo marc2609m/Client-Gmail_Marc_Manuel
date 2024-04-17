@@ -5,7 +5,7 @@ import bandejas.BandejaPrincipal;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.GridBagLayout;  
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JButton;
@@ -17,8 +17,8 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-public class Login extends JFrame{
-    
+public class Login extends JFrame {
+
     private JTextField TextCorreu;
     private JPasswordField TextPasswd;
     private Component component = this;

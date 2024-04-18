@@ -15,20 +15,22 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import main.Login;
 
-public class BandejaEsborranys extends JFrame{
+public class BandejaEsborranys extends JFrame {
+
     private EmailClientConnection ecc;
+    private List<Mail> allMailsDraft;
+    private int currentIndex = 0;
 
     public BandejaEsborranys() {
         bandejaEsborranys();
     }
-    
-    private void bandejaEsborranys(){
+
+    private void bandejaEsborranys() {
         setTitle("Esborranys");
         setSize(400, 300);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        
         JMenuBar menuBar = new JMenuBar();
-        
+
         JMenu menuBandejas = new JMenu("Safates");
         JMenuItem BandejaPrincipalItem = new JMenuItem("Safata principal");
         JMenuItem EnviadoslItem = new JMenuItem("Enviats");
@@ -38,27 +40,27 @@ public class BandejaEsborranys extends JFrame{
         menuBandejas.add(EnviadoslItem);
         menuBandejas.add(EsborranysItem);
         menuBandejas.add(CorreuBrossaItem);
-        
+
         JMenu menuFunciones = new JMenu("Funcions");
         JMenuItem EnviarMailItem = new JMenuItem("Enviar Mail");
         menuFunciones.add(EnviarMailItem);
-        
+
         JMenu menuLogout = new JMenu("Log out");
         JMenuItem LogoutItem = new JMenuItem("Log out");
         menuLogout.add(LogoutItem);
-        
+
         menuBar.add(menuBandejas);
         menuBar.add(menuFunciones);
         menuBar.add(menuLogout);
-        
-        ecc = new EmailClientConnection();
-        
-        List<Mail> mails = ecc.ConseguirEsborranys();
-        
-        Object[][] data = new Object[mails.size()][2];
 
-        for (int i = 0; i < mails.size(); i++) {
-            Mail m = mails.get(i);
+        ecc = new EmailClientConnection();
+
+        loadInitialMails();
+
+        Object[][] data = new Object[allMailsDraft.size()][2];
+
+        for (int i = 0; i < allMailsDraft.size(); i++) {
+            Mail m = allMailsDraft.get(i);
             data[i][0] = m.getRemitente();
             data[i][1] = m.getAsunto();
         }
@@ -66,7 +68,7 @@ public class BandejaEsborranys extends JFrame{
         String[] columnNames = {"Emissor", "Assumpte"};
         JTable table = new JTable(data, columnNames);
         JScrollPane scrollPane = new JScrollPane(table);
-        
+
         LogoutItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -77,7 +79,7 @@ public class BandejaEsborranys extends JFrame{
                 setVisible(false);
             }
         });
-        
+
         EnviarMailItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -86,7 +88,7 @@ public class BandejaEsborranys extends JFrame{
                 setVisible(false);
             }
         });
-        
+
         BandejaPrincipalItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -95,7 +97,7 @@ public class BandejaEsborranys extends JFrame{
                 setVisible(false);
             }
         });
-        
+
         EnviadoslItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -104,7 +106,7 @@ public class BandejaEsborranys extends JFrame{
                 setVisible(false);
             }
         });
-        
+
         CorreuBrossaItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -113,9 +115,30 @@ public class BandejaEsborranys extends JFrame{
                 setVisible(false);
             }
         });
-        
+
         getContentPane().add(scrollPane, BorderLayout.CENTER);
-        
+
         setJMenuBar(menuBar);
+    }
+
+    private void loadInitialMails() {
+        // Cargar los últimos 10 correos electrónicos en borrador
+        allMailsDraft = ecc.ConseguirEsborranys(0, 9);
+        currentIndex = allMailsDraft.size() - 1; // Actualizar el índice
+    }
+
+    private void loadMoreMails() {
+        int endIndex = currentIndex - 1; // El índice del correo anterior al último correo actual
+        int startIndex = Math.max(0, endIndex - 9); // El índice del correo anterior al primer correo actual
+        allMailsDraft.addAll(0, ecc.ConseguirEsborranys(startIndex, endIndex));
+        currentIndex = startIndex - 1; // Actualizar el índice
+    }
+
+    private void populateTableData(Object[][] data) {
+        for (int i = 0; i < allMailsDraft.size(); i++) {
+            Mail m = allMailsDraft.get(i);
+            data[i][0] = m.getRemitente();
+            data[i][1] = m.getAsunto();
+        }
     }
 }

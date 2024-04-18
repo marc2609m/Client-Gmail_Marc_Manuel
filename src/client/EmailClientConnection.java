@@ -228,7 +228,7 @@ public class EmailClientConnection {
         return mails;
     }
 
-    public List<Mail> ConseguirEnviados() {
+    public List<Mail> ConseguirEnviados(int startIndex, int endIndex) {
         List<Mail> mails = new ArrayList();
         try {
             Properties properties = new Properties();
@@ -249,9 +249,12 @@ public class EmailClientConnection {
             Folder folder = store.getFolder("[Gmail]/Enviats");
             folder.open(Folder.READ_ONLY);
 
-            Message[] mensajes = folder.getMessages();
+            // Obtener los mensajes en orden inverso
+            Message[] mensajes = folder.getMessages(folder.getMessageCount() - endIndex, folder.getMessageCount() - startIndex);
 
-            for (Message mensaje : mensajes) {
+            // Agregar los mensajes a la lista en orden inverso
+            for (int i = mensajes.length - 1; i >= 0; i--) {
+                Message mensaje = mensajes[i];
                 Mail m = new Mail();
                 m.setAsunto(mensaje.getSubject());
                 m.setRemitente(mensaje.getFrom()[0].toString());
@@ -272,8 +275,8 @@ public class EmailClientConnection {
         return mails;
     }
 
-    public List<Mail> ConseguirEsborranys() {
-        List<Mail> mails = new ArrayList();
+    public List<Mail> ConseguirEsborranys(int startIndex, int endIndex) {
+        List<Mail> mails = new ArrayList<>();
         try {
             Properties properties = new Properties();
             properties.put("mail.store.protocol", "imaps");
@@ -293,9 +296,12 @@ public class EmailClientConnection {
             Folder folder = store.getFolder("[Gmail]/Esborranys");
             folder.open(Folder.READ_ONLY);
 
-            Message[] mensajes = folder.getMessages();
+            // Obtener los mensajes en orden inverso
+            Message[] mensajes = folder.getMessages(folder.getMessageCount() - endIndex, folder.getMessageCount() - startIndex);
 
-            for (Message mensaje : mensajes) {
+            // Agregar los mensajes a la lista en orden inverso
+            for (int i = mensajes.length - 1; i >= 0; i--) {
+                Message mensaje = mensajes[i];
                 Mail m = new Mail();
                 m.setAsunto(mensaje.getSubject());
                 m.setRemitente(mensaje.getFrom()[0].toString());
@@ -371,7 +377,7 @@ public class EmailClientConnection {
     }
 
     public void agregarArchivoAdjunto(File archivoAdjunto) {
-            archivosAdjuntos.add(archivoAdjunto);
+        archivosAdjuntos.add(archivoAdjunto);
     }
 
 }

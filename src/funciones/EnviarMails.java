@@ -69,7 +69,7 @@ public class EnviarMails extends JFrame {
         JPanel panel1 = new JPanel(new GridBagLayout());
 
         JLabel labelDestinatario = new JLabel("Destinatari");
-        JLabel labelCC = new JLabel("Cc");
+        JLabel labelCC = new JLabel("Cc (Separar destinataris amb comas)");
         JLabel labelBCC = new JLabel("Bcc");
         JLabel labelAsunto = new JLabel("Assumpte");
         JLabel labelContenido = new JLabel("Contingut");

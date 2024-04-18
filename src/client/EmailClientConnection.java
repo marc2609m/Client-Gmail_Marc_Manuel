@@ -23,6 +23,7 @@ public class EmailClientConnection {
     private static String USERNAME;
     private static String PASSWORD;
     private List<File> archivosAdjuntos;
+    private static Mail m;
 
     public EmailClientConnection(String USERNAME, String PASSWORD) {
         this.USERNAME = USERNAME;
@@ -146,6 +147,8 @@ public class EmailClientConnection {
                     message.addRecipient(Message.RecipientType.CC, new InternetAddress(ccAddress.trim()));
                 }
             }
+            
+            message.setSubject(asunto);
 
             // Añadir destinatarios al campo "Bcc"
             if (bcc != null && !bcc.isBlank()) {
@@ -373,5 +376,103 @@ public class EmailClientConnection {
     public void agregarArchivoAdjunto(File archivoAdjunto) {
             archivosAdjuntos.add(archivoAdjunto);
     }
+    
+    public void eliminarMail(Mail mail, int startIndex, int endIndex){
+        try {
+            Properties properties = new Properties();
+            properties.put("mail.store.protocol", "imaps");
+            properties.put("mail.imaps.host", "imap.gmail.com");
+            properties.put("mail.imaps.port", "993");
+
+            Session session = Session.getInstance(properties, new Authenticator() {
+                @Override
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(USERNAME, PASSWORD);
+                }
+            });
+
+            Store store = session.getStore("imaps");
+            store.connect();
+
+            Folder folder = store.getFolder("INBOX");
+            folder.open(Folder.READ_WRITE);
+
+            // Obtener los mensajes en orden inverso
+            Message[] mensajes = folder.getMessages(folder.getMessageCount() - endIndex, folder.getMessageCount() - startIndex);
+
+            // Agregar los mensajes a la lista en orden inverso
+            for (int i = mensajes.length - 1; i >= 0; i--) {
+                Message mensaje = mensajes[i];
+                String asunto = mensaje.getSubject();
+                String remitente = mensaje.getFrom()[0].toString();
+                String contenido = mensaje.getContent().toString();
+                if(mail.getAsunto().equals(asunto) && mail.getContingut().equals(contenido) && mail.getRemitente().equals(remitente)){
+                    mensaje.setFlag(javax.mail.Flags.Flag.DELETED, true);
+                    break;
+                }
+            }
+
+            folder.close(true);
+            store.close();
+        } catch (NoSuchProviderException ex) {
+            System.out.println(ex.getMessage());
+        } catch (MessagingException ex) {
+            System.out.println(ex.getMessage());
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+    
+    public void verMail(Mail mail, int startIndex, int endIndex){
+        try {
+            Properties properties = new Properties();
+            properties.put("mail.store.protocol", "imaps");
+            properties.put("mail.imaps.host", "imap.gmail.com");
+            properties.put("mail.imaps.port", "993");
+
+            Session session = Session.getInstance(properties, new Authenticator() {
+                @Override
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(USERNAME, PASSWORD);
+                }
+            });
+
+            Store store = session.getStore("imaps");
+            store.connect();
+
+            Folder folder = store.getFolder("INBOX");
+            folder.open(Folder.READ_ONLY);
+
+            // Obtener los mensajes en orden inverso
+            Message[] mensajes = folder.getMessages(folder.getMessageCount() - endIndex, folder.getMessageCount() - startIndex);
+
+            // Agregar los mensajes a la lista en orden inverso
+            for (int i = mensajes.length - 1; i >= 0; i--) {
+                Message mensaje = mensajes[i];
+                String asunto = mensaje.getSubject();
+                String remitente = mensaje.getFrom()[0].toString();
+                String contenido = mensaje.getContent().toString();
+                if(mail.getRemitente().equals(remitente) && mail.getAsunto().equals(asunto) && mail.getContingut().equals(contenido)){
+                    m = new Mail(contenido, remitente, asunto);
+                }
+            }
+
+            folder.close(false);
+            store.close();
+        } catch (NoSuchProviderException ex) {
+            System.out.println(ex.getMessage());
+        } catch (MessagingException ex) {
+            System.out.println(ex.getMessage());
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+        }
+        m = mail;
+    }
+    
+    public Mail getMail(){
+        return m;
+    }
+    
+    
 
 }

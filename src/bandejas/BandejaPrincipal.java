@@ -3,6 +3,7 @@ package bandejas;
 import clases.Mail;
 import client.EmailClientConnection;
 import funciones.EnviarMails;
+import funciones.VerMail;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,6 +17,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.JPanel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import main.Login;
 
 public class BandejaPrincipal extends JFrame {
@@ -61,10 +64,10 @@ public class BandejaPrincipal extends JFrame {
 
         loadInitialMails();
 
-        Object[][] data = new Object[allMails.size()][2];
+        Object[][] data = new Object[allMails.size()][3];
         populateTableData(data);
 
-        String[] columnNames = {"Emissor", "Assumpte"};
+        String[] columnNames = {"Emissor", "Assumpte", "Contingut"};
         JTable table = new JTable(data, columnNames);
         JScrollPane scrollPane = new JScrollPane(table);
 
@@ -73,9 +76,30 @@ public class BandejaPrincipal extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 loadMoreMails();
-                Object[][] newData = new Object[allMails.size()][2];
+                Object[][] newData = new Object[allMails.size()][3];
                 populateTableData(newData);
                 table.setModel(new DefaultTableModel(newData, columnNames));
+            }
+        });
+        
+        table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                if (!e.getValueIsAdjusting()) { // Evita que el evento se dispare dos veces
+                    int selectedRow = table.getSelectedRow();
+                    if (selectedRow != -1) { // Verifica si se ha seleccionado alguna fila
+                        String remitente = (String) table.getValueAt(selectedRow, 0);
+                        String asunto = (String) table.getValueAt(selectedRow, 1);
+                        String contenido = (String) table.getValueAt(selectedRow, 2);
+                        Mail m = new Mail();
+                        m.setAsunto(asunto);
+                        m.setRemitente(remitente);
+                        m.setContingut(contenido);
+                        ecc.verMail(m, currentIndex, currentIndex);
+                        VerMail vm = new VerMail();
+                        vm.setVisible(true);
+                    }
+                }
             }
         });
 
@@ -153,6 +177,7 @@ public class BandejaPrincipal extends JFrame {
             Mail m = allMails.get(i);
             data[i][0] = m.getRemitente();
             data[i][1] = m.getAsunto();
+            data[i][2] = m.getContingut();
         }
     }
 }

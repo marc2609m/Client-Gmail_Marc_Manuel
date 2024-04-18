@@ -3,6 +3,7 @@ package clases;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Mail {
     
@@ -25,6 +26,36 @@ public class Mail {
 
     public String getContingut() {
         return contingut;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Mail other = (Mail) obj;
+        if (!Objects.equals(this.contingut, other.contingut)) {
+            return false;
+        }
+        if (!Objects.equals(this.remitente, other.remitente)) {
+            return false;
+        }
+        if (!Objects.equals(this.asunto, other.asunto)) {
+            return false;
+        }
+        return Objects.equals(this.ListaArchivos, other.ListaArchivos);
     }
 
     public String getRemitente() {

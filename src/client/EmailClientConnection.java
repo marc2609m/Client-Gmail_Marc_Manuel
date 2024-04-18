@@ -206,9 +206,15 @@ public class EmailClientConnection {
 
             Folder folder = store.getFolder("INBOX");
             folder.open(Folder.READ_ONLY);
-
+            
+            Message[] mensajes;
+            
             // Obtener los mensajes en orden inverso
-            Message[] mensajes = folder.getMessages(folder.getMessageCount() - endIndex, folder.getMessageCount() - startIndex);
+            if(folder.getMessageCount() < endIndex){
+                mensajes = folder.getMessages();
+            } else {
+                mensajes = folder.getMessages(folder.getMessageCount() - endIndex, folder.getMessageCount() - startIndex);
+            }
 
             // Agregar los mensajes a la lista en orden inverso
             for (int i = mensajes.length - 1; i >= 0; i--) {
@@ -246,7 +252,7 @@ public class EmailClientConnection {
         return mails;
     }
 
-    public List<Mail> ConseguirEnviados() {
+    public List<Mail> ConseguirEnviados(int startIndex, int endIndex) {
         List<Mail> mails = new ArrayList();
         try {
             Properties properties = new Properties();
@@ -266,14 +272,33 @@ public class EmailClientConnection {
 
             Folder folder = store.getFolder("[Gmail]/Enviats");
             folder.open(Folder.READ_ONLY);
+            
+            Message[] mensajes;
 
-            Message[] mensajes = folder.getMessages();
+            if(folder.getMessageCount() < endIndex){
+                mensajes = folder.getMessages();
+            } else {
+                mensajes = folder.getMessages(folder.getMessageCount() - endIndex, folder.getMessageCount() - startIndex);
+            }
 
             for (Message mensaje : mensajes) {
                 Mail m = new Mail();
                 m.setAsunto(mensaje.getSubject());
                 m.setRemitente(mensaje.getFrom()[0].toString());
-                m.setContingut(mensaje.getContent().toString());
+                String contenido = "";
+                Object mensajeContenido = mensaje.getContent();
+                if (mensajeContenido instanceof String) {
+                    contenido = (String) mensajeContenido;
+                } else if (mensajeContenido instanceof Multipart) {
+                    Multipart multipart = (Multipart) mensajeContenido;
+                    for (int j = 0; j < multipart.getCount(); j++) {
+                        BodyPart parte = multipart.getBodyPart(j);
+                        if (parte.isMimeType("text/plain")) {
+                            contenido += parte.getContent().toString();
+                        }
+                    }
+                }
+                m.setContingut(contenido);
                 mails.add(m);
             }
 
@@ -290,7 +315,7 @@ public class EmailClientConnection {
         return mails;
     }
 
-    public List<Mail> ConseguirEsborranys() {
+    public List<Mail> ConseguirEsborranys(int startIndex, int endIndex) {
         List<Mail> mails = new ArrayList();
         try {
             Properties properties = new Properties();
@@ -311,13 +336,32 @@ public class EmailClientConnection {
             Folder folder = store.getFolder("[Gmail]/Esborranys");
             folder.open(Folder.READ_ONLY);
 
-            Message[] mensajes = folder.getMessages();
+            Message[] mensajes;
+
+            if(folder.getMessageCount() < endIndex){
+                mensajes = folder.getMessages();
+            } else {
+                mensajes = folder.getMessages(folder.getMessageCount() - endIndex, folder.getMessageCount() - startIndex);
+            }
 
             for (Message mensaje : mensajes) {
                 Mail m = new Mail();
                 m.setAsunto(mensaje.getSubject());
                 m.setRemitente(mensaje.getFrom()[0].toString());
-                m.setContingut(mensaje.getContent().toString());
+                String contenido = "";
+                Object mensajeContenido = mensaje.getContent();
+                if (mensajeContenido instanceof String) {
+                    contenido = (String) mensajeContenido;
+                } else if (mensajeContenido instanceof Multipart) {
+                    Multipart multipart = (Multipart) mensajeContenido;
+                    for (int j = 0; j < multipart.getCount(); j++) {
+                        BodyPart parte = multipart.getBodyPart(j);
+                        if (parte.isMimeType("text/plain")) {
+                            contenido += parte.getContent().toString();
+                        }
+                    }
+                }
+                m.setContingut(contenido);
                 mails.add(m);
             }
 
@@ -334,7 +378,7 @@ public class EmailClientConnection {
         return mails;
     }
 
-    public List<Mail> ConseguirCorreuBrossa() {
+    public List<Mail> ConseguirCorreuBrossa(int startIndex, int endIndex) {
         List<Mail> mails = new ArrayList();
         try {
             Properties properties = new Properties();
@@ -354,14 +398,32 @@ public class EmailClientConnection {
 
             Folder folder = store.getFolder("[Gmail]/Correu brossa");
             folder.open(Folder.READ_ONLY);
-
-            Message[] mensajes = folder.getMessages();
-
+            
+            Message[] mensajes;
+            
+            if(folder.getMessageCount() < endIndex){
+                mensajes = folder.getMessages();
+            } else {
+                mensajes = folder.getMessages(folder.getMessageCount() - endIndex, folder.getMessageCount() - startIndex);
+            }
             for (Message mensaje : mensajes) {
                 Mail m = new Mail();
                 m.setAsunto(mensaje.getSubject());
                 m.setRemitente(mensaje.getFrom()[0].toString());
-                m.setContingut(mensaje.getContent().toString());
+                String contenido = "";
+                Object mensajeContenido = mensaje.getContent();
+                if (mensajeContenido instanceof String) {
+                    contenido = (String) mensajeContenido;
+                } else if (mensajeContenido instanceof Multipart) {
+                    Multipart multipart = (Multipart) mensajeContenido;
+                    for (int j = 0; j < multipart.getCount(); j++) {
+                        BodyPart parte = multipart.getBodyPart(j);
+                        if (parte.isMimeType("text/plain")) {
+                            contenido += parte.getContent().toString();
+                        }
+                    }
+                }
+                m.setContingut(contenido);
                 mails.add(m);
             }
 

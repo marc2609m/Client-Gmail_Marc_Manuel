@@ -13,6 +13,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
@@ -96,7 +97,7 @@ public class BandejaPrincipal extends JFrame {
                         m.setAsunto(asunto);
                         m.setRemitente(remitente);
                         m.setContingut(contenido);
-                        ecc.verMail(m, startIndex, currentIndex, "INBOX");
+                        ecc.verMail(m, 0, currentIndex, "INBOX");
                         VerMail vm = new VerMail();
                         vm.setVisible(true);
                     }
@@ -167,10 +168,35 @@ public class BandejaPrincipal extends JFrame {
     }
 
     private void loadMoreMails() {
-        endIndex = currentIndex - 1; // El índice del correo anterior al último correo actual
-        startIndex = Math.max(0, endIndex - 9); // El índice del correo anterior al primer correo actual
-        allMails.addAll(0, ecc.ConseguirInbox(startIndex, endIndex));
-        currentIndex = startIndex - 1; // Actualizar el índice
+        int startIndex = currentIndex + 1; // El índice del primer correo después del último correo actual
+        int endIndex = startIndex + 9; // El índice del último correo después del primer correo actual
+
+        // Cargar correos electrónicos adicionales
+        List<Mail> additionalMails = ecc.ConseguirInbox(startIndex, endIndex);
+
+        boolean ya = false;
+
+        if (!additionalMails.isEmpty()) {
+            for (int i = 0; i < additionalMails.size(); i++) {
+                for (int j = 0; j < allMails.size(); j++) {
+                    if (additionalMails.get(i).equals(allMails.get(j))) {
+                        ya = true;
+                        break;
+                    }
+                }
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "No hi ha mes correus per carregar");
+        }
+
+        if (ya) {
+            JOptionPane.showMessageDialog(this, "Tots els correus carregats");
+        } else {
+            allMails.addAll(additionalMails);
+        }
+
+        // Actualizar el índice
+        currentIndex = endIndex;
     }
 
     private void populateTableData(Object[][] data) {

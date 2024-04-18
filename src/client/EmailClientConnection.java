@@ -24,6 +24,8 @@ public class EmailClientConnection {
     private static String PASSWORD;
     private List<File> archivosAdjuntos;
     private static Mail m;
+    private static String bandejaA;
+    private static int inicia, acaba;
 
     public EmailClientConnection(String USERNAME, String PASSWORD) {
         this.USERNAME = USERNAME;
@@ -147,7 +149,7 @@ public class EmailClientConnection {
                     message.addRecipient(Message.RecipientType.CC, new InternetAddress(ccAddress.trim()));
                 }
             }
-            
+
             message.setSubject(asunto);
 
             // Añadir destinatarios al campo "Bcc"
@@ -214,7 +216,20 @@ public class EmailClientConnection {
                 Mail m = new Mail();
                 m.setAsunto(mensaje.getSubject());
                 m.setRemitente(mensaje.getFrom()[0].toString());
-                m.setContingut(mensaje.getContent().toString());
+                String contenido = "";
+                Object mensajeContenido = mensaje.getContent();
+                if (mensajeContenido instanceof String) {
+                    contenido = (String) mensajeContenido;
+                } else if (mensajeContenido instanceof Multipart) {
+                    Multipart multipart = (Multipart) mensajeContenido;
+                    for (int j = 0; j < multipart.getCount(); j++) {
+                        BodyPart parte = multipart.getBodyPart(j);
+                        if (parte.isMimeType("text/plain")) {
+                            contenido += parte.getContent().toString();
+                        }
+                    }
+                }
+                m.setContingut(contenido);
                 mails.add(m);
             }
 
@@ -374,10 +389,10 @@ public class EmailClientConnection {
     }
 
     public void agregarArchivoAdjunto(File archivoAdjunto) {
-            archivosAdjuntos.add(archivoAdjunto);
+        archivosAdjuntos.add(archivoAdjunto);
     }
-    
-    public void eliminarMail(Mail mail, int startIndex, int endIndex){
+
+    public void eliminarMail(Mail mail) {
         try {
             Properties properties = new Properties();
             properties.put("mail.store.protocol", "imaps");
@@ -394,21 +409,40 @@ public class EmailClientConnection {
             Store store = session.getStore("imaps");
             store.connect();
 
-            Folder folder = store.getFolder("INBOX");
+            Folder folder = store.getFolder(bandejaA);
             folder.open(Folder.READ_WRITE);
 
             // Obtener los mensajes en orden inverso
-            Message[] mensajes = folder.getMessages(folder.getMessageCount() - endIndex, folder.getMessageCount() - startIndex);
+            Message[] mensajes = folder.getMessages(folder.getMessageCount() - acaba, folder.getMessageCount() - inicia);
 
             // Agregar los mensajes a la lista en orden inverso
             for (int i = mensajes.length - 1; i >= 0; i--) {
                 Message mensaje = mensajes[i];
                 String asunto = mensaje.getSubject();
                 String remitente = mensaje.getFrom()[0].toString();
-                String contenido = mensaje.getContent().toString();
-                if(mail.getAsunto().equals(asunto) && mail.getContingut().equals(contenido) && mail.getRemitente().equals(remitente)){
-                    mensaje.setFlag(javax.mail.Flags.Flag.DELETED, true);
-                    break;
+                String contenido = "";
+                Object mensajeContenido = mensaje.getContent();
+                if (mensajeContenido instanceof String) {
+                    contenido = (String) mensajeContenido;
+                } else if (mensajeContenido instanceof Multipart) {
+                    Multipart multipart = (Multipart) mensajeContenido;
+                    for (int j = 0; j < multipart.getCount(); j++) {
+                        BodyPart parte = multipart.getBodyPart(j);
+                        if (parte.isMimeType("text/plain")) {
+                            contenido += parte.getContent().toString();
+                        }
+                    }
+                }
+                if (asunto == null || mail.getAsunto() == null) {
+                    if (mail.getContingut().equals(contenido) && mail.getRemitente().equals(remitente)) {
+                        mensaje.setFlag(javax.mail.Flags.Flag.DELETED, true);
+                        break;
+                    }
+                } else {
+                    if (mail.getAsunto().equals(asunto) && mail.getContingut().equals(contenido) && mail.getRemitente().equals(remitente)) {
+                        mensaje.setFlag(javax.mail.Flags.Flag.DELETED, true);
+                        break;
+                    }
                 }
             }
 
@@ -422,8 +456,8 @@ public class EmailClientConnection {
             System.out.println(ex.getMessage());
         }
     }
-    
-    public void verMail(Mail mail, int startIndex, int endIndex){
+
+    public void verMail(Mail mail, int startIndex, int endIndex, String bandeja) {
         try {
             Properties properties = new Properties();
             properties.put("mail.store.protocol", "imaps");
@@ -439,9 +473,15 @@ public class EmailClientConnection {
 
             Store store = session.getStore("imaps");
             store.connect();
-
-            Folder folder = store.getFolder("INBOX");
+            
+            bandejaA = bandeja;
+            
+            Folder folder = store.getFolder(bandeja);
             folder.open(Folder.READ_ONLY);
+            
+            inicia = startIndex;
+            
+            acaba = endIndex;
 
             // Obtener los mensajes en orden inverso
             Message[] mensajes = folder.getMessages(folder.getMessageCount() - endIndex, folder.getMessageCount() - startIndex);
@@ -451,9 +491,28 @@ public class EmailClientConnection {
                 Message mensaje = mensajes[i];
                 String asunto = mensaje.getSubject();
                 String remitente = mensaje.getFrom()[0].toString();
-                String contenido = mensaje.getContent().toString();
-                if(mail.getRemitente().equals(remitente) && mail.getAsunto().equals(asunto) && mail.getContingut().equals(contenido)){
-                    m = new Mail(contenido, remitente, asunto);
+                String contenido = "";
+                Object mensajeContenido = mensaje.getContent();
+                if (mensajeContenido instanceof String) {
+                    contenido = (String) mensajeContenido;
+                } else if (mensajeContenido instanceof Multipart) {
+                    Multipart multipart = (Multipart) mensajeContenido;
+                    for (int j = 0; j < multipart.getCount(); j++) {
+                        BodyPart parte = multipart.getBodyPart(j);
+                        if (parte.isMimeType("text/plain")) {
+                            contenido += parte.getContent().toString();
+                        }
+                    }
+                }
+                
+                if (asunto == null || mail.getAsunto() == null) {
+                    if (mail.getContingut().equals(contenido) && mail.getRemitente().equals(remitente)) {
+                        m = new Mail(contenido, remitente, asunto);
+                    }
+                } else {
+                    if (mail.getAsunto().equals(asunto) && mail.getContingut().equals(contenido) && mail.getRemitente().equals(remitente)) {
+                        m = new Mail(contenido, remitente, asunto);
+                    }
                 }
             }
 
@@ -468,11 +527,9 @@ public class EmailClientConnection {
         }
         m = mail;
     }
-    
-    public Mail getMail(){
+
+    public Mail getMail() {
         return m;
     }
-    
-    
 
 }

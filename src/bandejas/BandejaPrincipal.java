@@ -26,6 +26,7 @@ public class BandejaPrincipal extends JFrame {
     private EmailClientConnection ecc;
     private List<Mail> allMails;
     private int currentIndex = 0;
+    private int endIndex, startIndex;
 
     public BandejaPrincipal() {
         bandejaPrincipal();
@@ -95,7 +96,7 @@ public class BandejaPrincipal extends JFrame {
                         m.setAsunto(asunto);
                         m.setRemitente(remitente);
                         m.setContingut(contenido);
-                        ecc.verMail(m, currentIndex, currentIndex);
+                        ecc.verMail(m, startIndex, currentIndex, "INBOX");
                         VerMail vm = new VerMail();
                         vm.setVisible(true);
                     }
@@ -166,8 +167,8 @@ public class BandejaPrincipal extends JFrame {
     }
 
     private void loadMoreMails() {
-        int endIndex = currentIndex - 1; // El índice del correo anterior al último correo actual
-        int startIndex = Math.max(0, endIndex - 9); // El índice del correo anterior al primer correo actual
+        endIndex = currentIndex - 1; // El índice del correo anterior al último correo actual
+        startIndex = Math.max(0, endIndex - 9); // El índice del correo anterior al primer correo actual
         allMails.addAll(0, ecc.ConseguirInbox(startIndex, endIndex));
         currentIndex = startIndex - 1; // Actualizar el índice
     }

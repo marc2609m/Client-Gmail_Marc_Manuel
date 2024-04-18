@@ -26,7 +26,7 @@ public class VerMail extends JFrame{
     
     private void verMail(){
         setTitle("Safata principal");
-        setSize(400, 300);
+        setSize(400, 400);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         
         JLabel remitentText = new JLabel("Remitent");
@@ -46,7 +46,7 @@ public class VerMail extends JFrame{
         eliminarBoton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ecc.eliminarMail(m, 0, 9);
+                ecc.eliminarMail(m);
             }
         });
         
@@ -78,14 +78,14 @@ public class VerMail extends JFrame{
         
         panel1.add(asunto, c);
         
-        c.gridx = 2;
-        c.gridy = 0;
+        c.gridx = 0;
+        c.gridy = 2;
         
         panel1.add(contingutText, c);
         
-        c.gridx = 2;
-        c.gridy = 1;
-        
+        c.gridx = 1;
+        c.gridy = 2;
+      
         panel1.add(contingut, c);
         
         JPanel panel2 = new JPanel(new GridBagLayout());

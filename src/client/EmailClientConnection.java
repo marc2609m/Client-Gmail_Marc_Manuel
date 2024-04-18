@@ -147,7 +147,7 @@ public class EmailClientConnection {
                     message.addRecipient(Message.RecipientType.CC, new InternetAddress(ccAddress.trim()));
                 }
             }
-            
+
             message.setSubject(asunto);
 
             // Añadir destinatarios al campo "Bcc"
@@ -299,10 +299,12 @@ public class EmailClientConnection {
             Folder folder = store.getFolder("[Gmail]/Esborranys");
             folder.open(Folder.READ_ONLY);
 
-            // Obtener los mensajes en orden inverso
-            Message[] mensajes = folder.getMessages(folder.getMessageCount() - endIndex, folder.getMessageCount() - startIndex);
+            int totalMessages = folder.getMessageCount();
+            int actualStartIndex = Math.max(1, totalMessages - endIndex + 1);
+            int actualEndIndex = Math.min(totalMessages, totalMessages - startIndex + 1);
 
-            // Agregar los mensajes a la lista en orden inverso
+            Message[] mensajes = folder.getMessages(actualStartIndex, actualEndIndex);
+
             for (int i = mensajes.length - 1; i >= 0; i--) {
                 Message mensaje = mensajes[i];
                 Mail m = new Mail();
@@ -316,9 +318,7 @@ public class EmailClientConnection {
             store.close();
         } catch (NoSuchProviderException ex) {
             System.out.println(ex.getMessage());
-        } catch (MessagingException ex) {
-            System.out.println(ex.getMessage());
-        } catch (IOException ex) {
+        } catch (MessagingException | IOException ex) {
             System.out.println(ex.getMessage());
         }
 
@@ -326,7 +326,7 @@ public class EmailClientConnection {
     }
 
     public List<Mail> ConseguirCorreuBrossa() {
-        List<Mail> mails = new ArrayList();
+        List<Mail> mails = new ArrayList<>();
         try {
             Properties properties = new Properties();
             properties.put("mail.store.protocol", "imaps");
@@ -343,27 +343,25 @@ public class EmailClientConnection {
             Store store = session.getStore("imaps");
             store.connect();
 
-            Folder folder = store.getFolder("[Gmail]/Correu brossa");
+            Folder folder = store.getFolder("[Gmail]/Correu brossa"); // Modificado para obtener los correos de la carpeta de spam
             folder.open(Folder.READ_ONLY);
 
-            Message[] mensajes = folder.getMessages();
+            Message[] messages = folder.getMessages();
 
-            for (Message mensaje : mensajes) {
+            for (Message message : messages) {
                 Mail m = new Mail();
-                m.setAsunto(mensaje.getSubject());
-                m.setRemitente(mensaje.getFrom()[0].toString());
-                m.setContingut(mensaje.getContent().toString());
+                m.setAsunto(message.getSubject());
+                m.setRemitente(message.getFrom()[0].toString());
+                m.setContingut(message.getContent().toString());
                 mails.add(m);
             }
 
             folder.close(false);
             store.close();
-        } catch (NoSuchProviderException ex) {
-            System.out.println(ex.getMessage());
-        } catch (MessagingException ex) {
-            System.out.println(ex.getMessage());
-        } catch (IOException ex) {
-            System.out.println(ex.getMessage());
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         return mails;
@@ -382,8 +380,8 @@ public class EmailClientConnection {
     public void agregarArchivoAdjunto(File archivoAdjunto) {
         archivosAdjuntos.add(archivoAdjunto);
     }
-    
-    public void eliminarMail(Mail mail, int startIndex, int endIndex){
+
+    public void eliminarMail(Mail mail, int startIndex, int endIndex) {
         try {
             Properties properties = new Properties();
             properties.put("mail.store.protocol", "imaps");
@@ -412,7 +410,7 @@ public class EmailClientConnection {
                 String asunto = mensaje.getSubject();
                 String remitente = mensaje.getFrom()[0].toString();
                 String contenido = mensaje.getContent().toString();
-                if(mail.getAsunto().equals(asunto) && mail.getContingut().equals(contenido) && mail.getRemitente().equals(remitente)){
+                if (mail.getAsunto().equals(asunto) && mail.getContingut().equals(contenido) && mail.getRemitente().equals(remitente)) {
                     mensaje.setFlag(javax.mail.Flags.Flag.DELETED, true);
                     break;
                 }
@@ -428,8 +426,8 @@ public class EmailClientConnection {
             System.out.println(ex.getMessage());
         }
     }
-    
-    public void verMail(Mail mail, int startIndex, int endIndex){
+
+    public void verMail(Mail mail, int startIndex, int endIndex) {
         try {
             Properties properties = new Properties();
             properties.put("mail.store.protocol", "imaps");
@@ -458,7 +456,7 @@ public class EmailClientConnection {
                 String asunto = mensaje.getSubject();
                 String remitente = mensaje.getFrom()[0].toString();
                 String contenido = mensaje.getContent().toString();
-                if(mail.getRemitente().equals(remitente) && mail.getAsunto().equals(asunto) && mail.getContingut().equals(contenido)){
+                if (mail.getRemitente().equals(remitente) && mail.getAsunto().equals(asunto) && mail.getContingut().equals(contenido)) {
                     m = new Mail(contenido, remitente, asunto);
                 }
             }
@@ -474,11 +472,8 @@ public class EmailClientConnection {
         }
         m = mail;
     }
-    
-    public Mail getMail(){
+
+    public Mail getMail() {
         return m;
     }
-    
-    
-
 }

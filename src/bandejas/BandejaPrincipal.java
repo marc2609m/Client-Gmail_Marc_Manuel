@@ -81,7 +81,7 @@ public class BandejaPrincipal extends JFrame {
                 table.setModel(new DefaultTableModel(newData, columnNames));
             }
         });
-        
+
         table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
@@ -166,10 +166,17 @@ public class BandejaPrincipal extends JFrame {
     }
 
     private void loadMoreMails() {
-        int endIndex = currentIndex - 1; // El índice del correo anterior al último correo actual
-        int startIndex = Math.max(0, endIndex - 9); // El índice del correo anterior al primer correo actual
-        allMails.addAll(0, ecc.ConseguirInbox(startIndex, endIndex));
-        currentIndex = startIndex - 1; // Actualizar el índice
+        int startIndex = currentIndex + 1; // El índice del primer correo después del último correo actual
+        int endIndex = startIndex + 9; // El índice del último correo después del primer correo actual
+
+        // Cargar correos electrónicos adicionales
+        List<Mail> additionalMails = ecc.ConseguirInbox(startIndex, endIndex);
+
+        // Agregar correos electrónicos cargados al final de la lista
+        allMails.addAll(additionalMails);
+
+        // Actualizar el índice
+        currentIndex = endIndex;
     }
 
     private void populateTableData(Object[][] data) {

@@ -7,12 +7,16 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 import main.Login;
 
 public class BandejaEsborranys extends JFrame {
@@ -58,16 +62,22 @@ public class BandejaEsborranys extends JFrame {
         loadInitialMails();
 
         Object[][] data = new Object[allMailsDraft.size()][2];
-
-        for (int i = 0; i < allMailsDraft.size(); i++) {
-            Mail m = allMailsDraft.get(i);
-            data[i][0] = m.getRemitente();
-            data[i][1] = m.getAsunto();
-        }
+        populateTableData(data);
 
         String[] columnNames = {"Emissor", "Assumpte"};
         JTable table = new JTable(data, columnNames);
         JScrollPane scrollPane = new JScrollPane(table);
+
+        JButton moreButton = new JButton("Més");
+        moreButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                loadMoreMails();
+                Object[][] newData = new Object[allMailsDraft.size()][2];
+                populateTableData(newData);
+                table.setModel(new DefaultTableModel(newData, columnNames));
+            }
+        });
 
         LogoutItem.addActionListener(new ActionListener() {
             @Override
@@ -116,22 +126,44 @@ public class BandejaEsborranys extends JFrame {
             }
         });
 
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(moreButton);
+
         getContentPane().add(scrollPane, BorderLayout.CENTER);
+        getContentPane().add(buttonPanel, BorderLayout.SOUTH);
 
         setJMenuBar(menuBar);
     }
 
     private void loadInitialMails() {
-        // Cargar los últimos 10 correos electrónicos en borrador
-        allMailsDraft = ecc.ConseguirEsborranys(0, 9);
-        currentIndex = allMailsDraft.size() - 1; // Actualizar el índice
+        // Cargar la primera página de correos electrónicos en borrador (por ejemplo, los primeros 10 correos)
+        allMailsDraft = ecc.ConseguirEsborranys(1, 10); // Cambiado a cargar solo una página
+        currentIndex = allMailsDraft.size(); // Actualizar el índice
     }
 
     private void loadMoreMails() {
+        if (allMailsDraft.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No hay más correos electrónicos disponibles.", "No hay más correos", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
         int endIndex = currentIndex - 1; // El índice del correo anterior al último correo actual
-        int startIndex = Math.max(0, endIndex - 9); // El índice del correo anterior al primer correo actual
-        allMailsDraft.addAll(0, ecc.ConseguirEsborranys(startIndex, endIndex));
-        currentIndex = startIndex - 1; // Actualizar el índice
+        int startIndex = Math.max(1, endIndex - 9); // El índice del correo anterior al primer correo actual, asegurando que no sea menor que 1
+
+        // Si el índice de inicio es 1, significa que estamos en la primera página, por lo que no hay más correos para cargar
+        if (startIndex == 1) {
+            JOptionPane.showMessageDialog(this, "No hay más correos electrónicos disponibles.", "No hay más correos", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        // Cargar correos electrónicos adicionales
+        List<Mail> additionalMails = ecc.ConseguirEsborranys(startIndex, endIndex);
+
+        // Agregar correos electrónicos cargados al principio de la lista
+        allMailsDraft.addAll(0, additionalMails);
+
+        // Actualizar el índice
+        currentIndex = startIndex - 1;
     }
 
     private void populateTableData(Object[][] data) {

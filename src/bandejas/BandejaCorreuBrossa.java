@@ -81,6 +81,17 @@ public class BandejaCorreuBrossa extends JFrame{
             }
         });
         
+        JButton updateButton = new JButton("↺");
+        updateButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateMails();
+                Object[][] newData = new Object[allMails.size()][3];
+                populateTableData(newData);
+                table.setModel(new DefaultTableModel(newData, columnNames));
+            }
+        });
+        
         LogoutItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -121,6 +132,7 @@ public class BandejaCorreuBrossa extends JFrame{
         
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(moreButton);
+        buttonPanel.add(updateButton);
         
         getContentPane().add(scrollPane, BorderLayout.CENTER);
         getContentPane().add(buttonPanel, BorderLayout.SOUTH);
@@ -132,6 +144,11 @@ public class BandejaCorreuBrossa extends JFrame{
         // Cargar los últimos 10 correos
         allMails = ecc.ConseguirCorreuBrossa(0, 9);
         currentIndex = allMails.size() - 1; // Actualizar el índice
+    }
+    
+    private void updateMails(){
+        allMails.clear();
+        allMails = ecc.ConseguirInbox(0, currentIndex);
     }
     
     private void loadMoreMails() {

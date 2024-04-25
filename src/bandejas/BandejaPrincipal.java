@@ -84,6 +84,17 @@ public class BandejaPrincipal extends JFrame {
             }
         });
         
+        JButton updateButton = new JButton("↺");
+        updateButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateMails();
+                Object[][] newData = new Object[allMails.size()][3];
+                populateTableData(newData);
+                table.setModel(new DefaultTableModel(newData, columnNames));
+            }
+        });
+        
         table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
@@ -154,6 +165,7 @@ public class BandejaPrincipal extends JFrame {
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(moreButton);
+        buttonPanel.add(updateButton);
 
         getContentPane().add(scrollPane, BorderLayout.CENTER);
         getContentPane().add(buttonPanel, BorderLayout.SOUTH);
@@ -165,6 +177,11 @@ public class BandejaPrincipal extends JFrame {
         // Cargar los últimos 10 correos
         allMails = ecc.ConseguirInbox(0, 9);
         currentIndex = allMails.size() - 1; // Actualizar el índice
+    }
+    
+    private void updateMails(){
+        allMails.clear();
+        allMails = ecc.ConseguirInbox(0, currentIndex);
     }
 
     private void loadMoreMails() {
